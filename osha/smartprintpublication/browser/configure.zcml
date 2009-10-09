@@ -1,7 +1,25 @@
 <configure
     xmlns="http://namespaces.zope.org/zope"
     xmlns:browser="http://namespaces.zope.org/browser"
-    i18n_domain="osha.smartprintpublication">
+    i18n_domain="osha">
 
+    <class class=".publication_settings.OshaSmartprintSettings">
+        <require
+            permission="cmf.ModifyPortalContent"
+            interface="..interfaces.IOshaSmartprintSettings"
+            set_schema="..interfaces.IOshaSmartprintSettings"
+            />
+     </class>
+
+    <adapter
+     factory=".publication_settings.smartprint_adapter_document"
+    />
+
+    <browser:page
+        for="*"
+        name="publishAsPDF"
+        class=".publication_settings.OshaSmartprintSettingsForm"
+        permission="cmf.ModifyPortalContent"
+    />
 
 </configure>
