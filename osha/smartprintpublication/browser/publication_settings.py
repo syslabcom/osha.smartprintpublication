@@ -12,6 +12,7 @@ import Acquisition
 import transaction
 
 from osha.smartprintpublication.interfaces import IOshaSmartprintSettings
+from osha.smartprintpublication.browser.widget import ReferenceURLWidget
 from osha.theme import OSHAMessageFactory as _
 
 
@@ -31,6 +32,7 @@ class OshaSmartprintSettings(Persistent):
 
     path = ''
     issue = ''
+    existing_publication = ''
 
 smartprint_adapter_document = factory(OshaSmartprintSettings)
 
@@ -38,6 +40,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
     form_fields = form.Fields(IOshaSmartprintSettings)
     label = u"Please specify the details for the publication"
     form_fields['path'].custom_widget = UberSelectionWidget
+    form_fields['existing_publication'].custom_widget = ReferenceURLWidget
 
     @form.action(_("Apply"))
     def handle_edit_action(self, action, data):
@@ -74,6 +77,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
         newFile.setFile(rawPDF)
         
         self.status = u"%(verb)s publication at %(url)s" %dict(verb=verb, url=newFile.absolute_url())
+        settings.existing_publication = newFile.UID()
         # del newFile
         
         

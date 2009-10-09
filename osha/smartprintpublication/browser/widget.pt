@@ -1,0 +1,11 @@
+<div xmlns:tal="http://xml.zope.org/namespaces/tal">
+
+<p tal:define="form_value view/_getFormValue">
+
+   <a href="#" tal:attributes="href string:$form_value/view"><span tal:content="form_value" ></span></a>
+
+</p>
+
+
+
+</div> 
