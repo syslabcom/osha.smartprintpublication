@@ -1,13 +1,35 @@
 from setuptools import setup, find_packages
 import os
 
+def read(*rnames):
+    return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
+
+
 version = '0.1'
+
+long_description = (
+    read('README.txt')
+    + '\n' +
+    'Change history\n'
+    '**************\n'
+    + '\n' +
+    read('CHANGES.txt')
+    + '\n' +
+    'Detailed Documentation\n'
+    '**********************\n'
+    + '\n' +
+    'Contributors\n'
+    '************\n'
+    + '\n' +
+    read('CONTRIBUTORS.txt')
+    + '\n'
+    )
+
 
 setup(name='osha.smartprintpublication',
       version=version,
       description="Integrationn of syslab.osha.smartprintng into OSHA portal and slc.publications",
-      long_description=open("README.txt").read() + "\n" +
-                       open(os.path.join("docs", "HISTORY.txt")).read(),
+      long_description=long_description,
       # Get more strings from http://www.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[
         "Framework :: Plone",
