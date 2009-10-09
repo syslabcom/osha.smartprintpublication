@@ -1,0 +1,2 @@
+recursive-include osha *
+global-exclude *pyc

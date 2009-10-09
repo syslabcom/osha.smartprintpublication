@@ -1,0 +1,14 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="osha.smartprintpublication">
+
+  <genericsetup:registerProfile
+      name="default"
+      title="Smartprint publications for OSHA"
+      directory="profiles/default"
+      description='Integration of SmartPrintNG client for slc.publications in OSHA'
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      />
+
+</configure>
