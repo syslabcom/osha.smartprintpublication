@@ -47,7 +47,10 @@ setup(name='osha.smartprintpublication',
       zip_safe=False,
       install_requires=[
           'setuptools',
-          # -*- Extra requirements: -*-
+          'slc.publications',
+          'syslab.osha.smartprintng',
+          'osha.policy',
+          'osha.theme',
       ],
       entry_points="""
       # -*- Entry points: -*-
