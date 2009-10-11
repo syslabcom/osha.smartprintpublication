@@ -17,13 +17,12 @@ class ReferenceURLWidget(SimpleInputWidget):
         that came from the request, the value from the _data attribute or the
         default value.
         """
-        import pdb; pdb.set_trace()
+        input_value = ''
+        if not self._data:
+            return input_value
         pc = getToolByName(self.context.context, 'portal_catalog')
-
-
         brains = pc(UID=self._data)
 
-        input_value = ''
         for b in brains:
             if b is not None:
                 return b.getURL()
