@@ -33,6 +33,7 @@ class OshaSmartprintSettings(Persistent):
     path = ''
     issue = ''
     existing_publication = ''
+    subject = tuple()
 
 smartprint_adapter_document = factory(OshaSmartprintSettings)
 
@@ -48,6 +49,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
         settings = IOshaSmartprintSettings(self.context)
         settings.path = data['path']
         settings.issue = data['issue']
+        settings.subject = data['subject']
         
         asPDF = self.context.restrictedTraverse('asPDF', None)
         if not asPDF:
@@ -75,6 +77,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
 
         newFile.processForm(values=dict(id=filename, title=self.context.Title()))
         newFile.setFile(rawPDF)
+        newFile.setSubject(data['subject'])
         
         self.status = u"%(verb)s publication at %(url)s" %dict(verb=verb, url=newFile.absolute_url())
         settings.existing_publication = newFile.UID()
