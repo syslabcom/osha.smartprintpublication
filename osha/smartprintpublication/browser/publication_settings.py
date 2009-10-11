@@ -34,6 +34,7 @@ class OshaSmartprintSettings(Persistent):
     issue = ''
     existing_publication = ''
     subject = tuple()
+    existing_translations = list()
 
 smartprint_adapter_document = factory(OshaSmartprintSettings)
 
@@ -42,45 +43,104 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
     label = u"Please specify the details for the publication"
     form_fields['path'].custom_widget = UberSelectionWidget
     form_fields['existing_publication'].custom_widget = ReferenceURLWidget
+    form_fields['existing_translations'].custom_widget = ReferenceURLWidget
 
     @form.action(_("Apply"))
     def handle_edit_action(self, action, data):
-        
-        settings = IOshaSmartprintSettings(self.context)
-        settings.path = data['path']
-        settings.issue = data['issue']
-        settings.subject = data['subject']
-        
-        asPDF = self.context.restrictedTraverse('asPDF', None)
-        if not asPDF:
-            # sth bad has happened
-            print "view asPDF not found"
-            return
-        rawPDF = asPDF(number=data['issue'], plainfile=True)
+        if not self.context.isCanonical():
+            can = self.context.getCanonical()
+            self.status = u"ERROR: You are not working on the canonical version. Please go to the '%s' " \
+                u"version at \n%s" %(can.Language(), can.absolute_url())
+        else:
+            settings = IOshaSmartprintSettings(self.context)
+            settings.path = data['path']
+            settings.issue = data['issue']
+            settings.subject = data['subject']
+            
+            msg = self.handlePDFCreation(settings)
+            self.status = "\n".join(msg)
 
-        path = data['path']
+
+    def handlePDFCreation(self, settings):
+        status = list()
+        transUIDs = list()
+        
+        path = settings.path
         if path.startswith('/'):
             path = path[1:]
         dest = self.context.restrictedTraverse(path, None)
-        filename = "%s.pdf" %self.context.getId()
         if not dest:
-            print "destination folder not found!"
-            return
+            status.append(u"ERROR: destination folder not found!")
+            return status
 
+        canLang = self.context.Language()
+
+        msg, baseFile = self.createPDF(settings, dest, self.context)
+        status.append(msg)
+        if not baseFile:
+            status.append(u"ERROR: publication could not be created")
+            return status
+        settings.existing_publication = baseFile.UID()
+        
+        #import pdb; pdb.set_trace()
+        translations = self.context.getTranslations()
+        for lang in translations.keys():
+            if lang == canLang:
+                continue
+            msg, uid = self.createTranslatedPDF(settings, translations[lang][0], lang, baseFile)
+            status.append(msg)
+            if not uid:
+                status.append(u"ERROR: translated version of the publication could not be created")
+                return status
+            transUIDs.append(uid)
+        settings.existing_translations = transUIDs
+        
+        return status
+
+
+    def createPDF(self, settings, dest, context):
+        asPDF = context.restrictedTraverse('asPDF', None)
+        if not asPDF:
+            # sth bad has happened
+            return (u"ERROR: could not find BrowserView for creating a PDF", None)
+        rawPDF = asPDF(number=settings.issue, plainfile=True)
+
+        filename = "%s.pdf" %context.getId()
         verb ="Updated"
         if not getattr(Acquisition.aq_base(dest), filename, None):
             dest.invokeFactory(type_name="File", id=filename)
-            transaction.savepoint()
+            transaction.commit()
             verb="Added"
         newFile = getattr(dest, filename)
         newFile.unmarkCreationFlag()
-
-        newFile.processForm(values=dict(id=filename, title=self.context.Title()))
+        newFile.processForm(values=dict(id=filename, title=context.Title()))
         newFile.setFile(rawPDF)
-        newFile.setSubject(data['subject'])
+        newFile.setSubject(settings.subject)
+        transaction.savepoint()
+        return (u"%(verb)s publication at %(url)s" %dict(verb=verb, url=newFile.absolute_url()), newFile)
         
-        self.status = u"%(verb)s publication at %(url)s" %dict(verb=verb, url=newFile.absolute_url())
-        settings.existing_publication = newFile.UID()
-        # del newFile
+
+    def createTranslatedPDF(self, settings, context, lang, baseFile):
+        asPDF = context.restrictedTraverse('asPDF', None)
+        if not asPDF:
+            # sth bad has happened
+            return (u"ERROR: could not find BrowserView for creating a PDF", None)
+        rawPDF = asPDF(number=settings.issue, plainfile=True)
         
+        filename = "%s.pdf" %context.getId()
+        verb = "Updated"
+        if not baseFile.getTranslation(lang):
+            transFile = baseFile.addTranslation(lang)
+            transaction.savepoint()
+            transFile.unmarkCreationFlag()
+            verb="Added"
+        transFile = baseFile.getTranslation(lang)
+        transFile.processForm(values=dict(id=filename, title=context.Title()))
+        transFile.setFile(rawPDF)
+        transaction.savepoint()
+        
+        return (u"%(verb)s translated publication in language '%(lang)s' at %(path)s" %dict(verb=verb, lang=lang, path=transFile.absolute_url()),
+            transFile.UID())
+        
+
         

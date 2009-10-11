@@ -20,6 +20,14 @@ class IOshaSmartprintSettings(Interface):
                           required=False,
                           readonly=True,
             )
+    existing_translations = schema.List(title=_('Existing translations'),
+                                        description=_(u'If present, shows the paths of all translations of the '
+                                        'Publication associated with this document.'),
+                                        required=False,
+                                        readonly=True,
+                                        default=list(),
+                                        value_type=schema.ASCIILine(),
+            )
 
     path = schema.Choice(title=_(u'Path'),
                         description=_(u'Specify the path where the file should be created / updated'),
