@@ -3,7 +3,7 @@ from zope.app.form.interfaces import IInputWidget
 from zope.app.form.browser.widget import SimpleInputWidget
 from zope.app.pagetemplate.viewpagetemplatefile import ViewPageTemplateFile
 from Products.CMFCore.utils import getToolByName
-
+from types import StringType, UnicodeType
 
 class ReferenceURLWidget(SimpleInputWidget):
 
@@ -17,15 +17,20 @@ class ReferenceURLWidget(SimpleInputWidget):
         that came from the request, the value from the _data attribute or the
         default value.
         """
-        input_value = ''
-        if not self._data:
-            return input_value
+        input_value = list()
         pc = getToolByName(self.context.context, 'portal_catalog')
-        brains = pc(UID=self._data)
+        data = self._data
+        if not data:
+            return input_value
+        if isinstance(data, StringType) or isinstance(data, UnicodeType):
+            data = [data]
+        for uid in data:
+            brains = pc(UID=uid)
 
-        for b in brains:
-            if b is not None:
-                return b.getURL()
+            if len(brains):
+                b = brains[0]
+                if b is not None:
+                    input_value.append((b.getURL(), getattr(b, 'Language', '')))
 
         return input_value
 

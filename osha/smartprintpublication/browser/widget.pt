@@ -2,7 +2,15 @@
 
 <p tal:define="form_value view/_getFormValue">
 
-   <a href="#" tal:attributes="href string:$form_value/view"><span tal:content="form_value" ></span></a>
+    <span tal:repeat="val form_value">
+      <span tal:define="url python:val[0];
+                          lang python:val[1]">
+        <a href="#" tal:attributes="href string:$url/view"><span tal:content="url" ></span></a>
+        <span tal:condition="lang">
+          (<span tal:replace="lang" />)
+        </span>
+      </span>
+    </span>
 
 </p>
 
