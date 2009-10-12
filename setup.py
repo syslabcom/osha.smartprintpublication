@@ -33,6 +33,8 @@ setup(name='osha.smartprintpublication',
       # Get more strings from http://www.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[
         "Framework :: Plone",
+        "Framework :: Zope2",
+        "Framework :: Zope3",
         "Programming Language :: Python",
         "Topic :: Software Development :: Libraries :: Python Modules",
         ],
@@ -41,7 +43,7 @@ setup(name='osha.smartprintpublication',
       author_email='info@syslab.com',
       url='http://www.syslab.com/',
       license='GPL',
-      packages=find_packages(exclude=['ez_setup']),
+      packages = ['osha', 'osha/smartprintpublication'],
       namespace_packages=['osha'],
       include_package_data=True,
       zip_safe=False,
@@ -54,11 +56,5 @@ setup(name='osha.smartprintpublication',
       ],
       entry_points="""
       # -*- Entry points: -*-
-
-      [distutils.setup_keywords]
-      paster_plugins = setuptools.dist:assert_string_list
-
-      [egg_info.writers]
-      paster_plugins.txt = setuptools.command.egg_info:write_arg
       """,
       )
