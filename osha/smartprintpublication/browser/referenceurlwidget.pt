@@ -1,0 +1,19 @@
+<div xmlns:tal="http://xml.zope.org/namespaces/tal">
+
+<p tal:define="form_value view/_getFormValue">
+
+    <span tal:repeat="val form_value">
+      <span tal:define="url python:val[0];
+                          lang python:val[1]">
+        <a href="#" tal:attributes="href string:$url/view"><span tal:content="url" ></span></a>
+        <span tal:condition="lang">
+          (<span tal:replace="lang" />)
+        </span>
+      </span>
+    </span>
+
+</p>
+
+
+
+</div> 

@@ -7,7 +7,7 @@ from types import StringType, UnicodeType
 
 class ReferenceURLWidget(SimpleInputWidget):
 
-    __call__ = ViewPageTemplateFile('widget.pt')
+    __call__ = ViewPageTemplateFile('referenceurlwidget.pt')
 
 
     def _getFormValue(self):
