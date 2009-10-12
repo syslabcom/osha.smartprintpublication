@@ -81,6 +81,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             status.append(u"ERROR: publication could not be created")
             return status
         settings.existing_publication = baseFile.UID()
+        transaction.commit()
         
         #import pdb; pdb.set_trace()
         translations = self.context.getTranslations()
@@ -131,13 +132,12 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
         verb = "Updated"
         if not baseFile.getTranslation(lang):
             transFile = baseFile.addTranslation(lang)
-            transaction.savepoint()
             transFile.unmarkCreationFlag()
             verb="Added"
         transFile = baseFile.getTranslation(lang)
         transFile.processForm(values=dict(id=filename, title=context.Title()))
         transFile.setFile(rawPDF)
-        transaction.savepoint()
+        transaction.commit()
         
         return (u"%(verb)s translated publication in language '%(lang)s' at %(path)s" %dict(verb=verb, lang=lang, path=transFile.absolute_url()),
             transFile.UID())
