@@ -43,7 +43,13 @@ smartprint_adapter_document = factory(OshaSmartprintSettings)
 
 class OshaSmartprintSettingsForm(form.PageEditForm):
     form_fields = form.Fields(IOshaSmartprintSettings)
-    label = u"Please specify the details for the publication"
+    label = u"Create a Publication (PDF) from this document"
+    description = u"""With this form you can create a Publication (plus translations) from a Document. Set the
+    correct metadata and choose a destination folder where the Publication should be created.
+    A PDF document will be generated for all translations of the document and saved as a Publication in the
+    specified folder. This will take a while!
+    If you change the original document or want to set other metadata via this form, you can always submit this form again.
+    All existing publications (listed below) will be updated."""
     form_fields['path'].custom_widget = UberSelectionWidget
     form_fields['existing_publication'].custom_widget = ReferenceURLWidget
     form_fields['existing_translations'].custom_widget = ReferenceURLWidget
