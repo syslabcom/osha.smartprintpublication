@@ -63,37 +63,41 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
                 u"version at \n%s" %(can.Language(), can.absolute_url())
         else:
             settings = IOshaSmartprintSettings(self.context)
-            settings.path = data['path']
+            path = data['path']
             settings.publication_date = data['publication_date']
             settings.issue = data['issue']
             settings.subject = data['subject']
             
-            msg = self.handlePDFCreation(settings)
+            msg = self.handlePDFCreation(settings, path)
             self.status = "\n".join(msg)
 
 
-    def handlePDFCreation(self, settings):
+    def handlePDFCreation(self, settings, path):
         status = list()
         transUIDs = list()
         
-        path = settings.path
-        if path.startswith('/'):
-            path = path[1:]
-        dest = self.context.restrictedTraverse(path, None)
+        path_has_changed = False
+        if path!=settings.path:
+            path_has_changed = True
+        
+        relpath = path
+        if relpath.startswith('/'):
+            relpath = relpath[1:]
+        dest = self.context.restrictedTraverse(relpath, None)
         if not dest:
             status.append(u"ERROR: destination folder not found!")
             return status
 
         canLang = self.context.Language()
 
-        msg, baseFile = self.createPDF(settings, dest, self.context)
+        msg, baseFile = self.createPDF(settings, dest, self.context, path_has_changed)
         status.append(msg)
         if not baseFile:
             status.append(u"ERROR: publication could not be created")
             return status
-        settings.existing_publication = baseFile.UID()
-
-        #import pdb; pdb.set_trace()
+        # creating the canonical version went ok, so now we can persist the path
+        settings.path = path
+        
         translations = self.context.getTranslations()
         if len(translations)>1 and baseFile.Language()!=canLang:
             baseFile.setLanguage(canLang)
@@ -114,7 +118,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
         return status
 
 
-    def createPDF(self, settings, dest, context):
+    def createPDF(self, settings, dest, context, path_has_changed):
         asPDF = context.restrictedTraverse('asPDF', None)
         if not asPDF:
             # sth bad has happened
@@ -123,12 +127,26 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
 
         filename = "%s.pdf" %context.getId()
         verb ="Updated"
-        if not getattr(Acquisition.aq_base(dest), filename, None):
+        if not settings.existing_publication or path_has_changed:
+            if getattr(Acquisition.aq_base(dest), filename, None):
+                obj = getattr(dest, filename)
+                return (u"ERROR: an object of type %(type)s already exists at %(path)s, but is not connected " \
+                 "to this document. Please remove it first or change the document's short name (id)" %dict(
+                    type=type(Acquisition.aq_base(obj)), path=obj.absolute_url()), None)
             dest.invokeFactory(type_name="File", id=filename)
             transaction.commit()
             verb="Added"
-        newFile = getattr(dest, filename)
-        newFile.unmarkCreationFlag()
+            newFile = getattr(dest, filename)
+            newFile.unmarkCreationFlag()
+            settings.existing_publication = newFile.UID()
+        else:
+            catalog = getToolByName(context, 'portal_catalog')
+            brains = catalog(UID=settings.existing_publication)
+            if not len(brains):
+                return (u"ERROR: existing Publication could not be retrieved", None)
+            newFile = brains[0].getObject()
+            if not newFile:
+                return (u"ERROR: reference to exiting Publication is broken", None)
         newFile.processForm(values=dict(id=filename, title=context.Title()))
         newFile.setFile(rawPDF)
         newFile.setSubject(settings.subject)
