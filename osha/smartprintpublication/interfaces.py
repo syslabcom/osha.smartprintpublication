@@ -14,6 +14,11 @@ class IOshaSmartprintSettings(Interface):
                         default='',
                         required=True)
 
+    publication_date = schema.Date(title=_(u'Publication date'),
+                        description=_(u'Set the official publication date here'),
+                        required=False,
+            )
+
     existing_publication = schema.ASCIILine(title=_(u'Existing publication'),
                         description=_(u'If present, shows the path of the Publication associated with this document. '
                           'It will be overwritten'),

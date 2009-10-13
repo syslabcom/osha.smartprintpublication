@@ -12,7 +12,9 @@ import Acquisition
 import transaction
 
 from osha.smartprintpublication.interfaces import IOshaSmartprintSettings
-from osha.smartprintpublication.browser.widget import ReferenceURLWidget
+from osha.smartprintpublication.browser.widget import ReferenceURLWidget, DatePickerWidget
+from datetime import date
+from DateTime import DateTime
 from osha.theme import OSHAMessageFactory as _
 
 
@@ -32,6 +34,7 @@ class OshaSmartprintSettings(Persistent):
 
     path = ''
     issue = ''
+    publication_date = None
     existing_publication = ''
     subject = tuple()
     existing_translations = list()
@@ -44,6 +47,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
     form_fields['path'].custom_widget = UberSelectionWidget
     form_fields['existing_publication'].custom_widget = ReferenceURLWidget
     form_fields['existing_translations'].custom_widget = ReferenceURLWidget
+    form_fields['publication_date'].custom_widget = DatePickerWidget
 
     @form.action(_("Apply"))
     def handle_edit_action(self, action, data):
@@ -54,6 +58,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
         else:
             settings = IOshaSmartprintSettings(self.context)
             settings.path = data['path']
+            settings.publication_date = data['publication_date']
             settings.issue = data['issue']
             settings.subject = data['subject']
             
@@ -117,6 +122,8 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
         newFile.processForm(values=dict(id=filename, title=context.Title()))
         newFile.setFile(rawPDF)
         newFile.setSubject(settings.subject)
+        if isinstance(settings.publication_date, date):
+            newFile.setEffectiveDate(DateTime(settings.publication_date.isoformat()))
         transaction.savepoint()
         return (u"%(verb)s publication at %(url)s" %dict(verb=verb, url=newFile.absolute_url()), newFile)
         
@@ -132,12 +139,16 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
         verb = "Updated"
         if not baseFile.getTranslation(lang):
             transFile = baseFile.addTranslation(lang)
-            transFile.unmarkCreationFlag()
+            transaction.commit()
             verb="Added"
+        transFile = baseFile.getTranslation(lang)
+        transFile.unmarkCreationFlag()
         transFile = baseFile.getTranslation(lang)
         transFile.processForm(values=dict(id=filename, title=context.Title()))
         transFile.setFile(rawPDF)
-        transaction.commit()
+        if isinstance(settings.publication_date, date):
+            transFile.setEffectiveDate(DateTime(settings.publication_date.isoformat()))
+        #transaction.commit()
         
         return (u"%(verb)s translated publication in language '%(lang)s' at %(path)s" %dict(verb=verb, lang=lang, path=transFile.absolute_url()),
             transFile.UID())
