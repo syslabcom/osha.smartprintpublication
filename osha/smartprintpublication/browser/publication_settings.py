@@ -86,10 +86,13 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             status.append(u"ERROR: publication could not be created")
             return status
         settings.existing_publication = baseFile.UID()
-        transaction.commit()
-        
+
         #import pdb; pdb.set_trace()
         translations = self.context.getTranslations()
+        if len(translations)>1 and baseFile.Language()!=canLang:
+            baseFile.setLanguage(canLang)
+
+        transaction.commit()
         for lang in translations.keys():
             if lang == canLang:
                 continue
