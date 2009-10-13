@@ -99,6 +99,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
                 status.append(u"ERROR: translated version of the publication could not be created")
                 return status
             transUIDs.append(uid)
+            transaction.commit()
         settings.existing_translations = transUIDs
         
         return status
@@ -124,9 +125,8 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
         newFile.setSubject(settings.subject)
         if isinstance(settings.publication_date, date):
             newFile.setEffectiveDate(DateTime(settings.publication_date.isoformat()))
-        transaction.savepoint()
         return (u"%(verb)s publication at %(url)s" %dict(verb=verb, url=newFile.absolute_url()), newFile)
-        
+
 
     def createTranslatedPDF(self, settings, context, lang, baseFile):
         asPDF = context.restrictedTraverse('asPDF', None)
@@ -134,24 +134,20 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             # sth bad has happened
             return (u"ERROR: could not find BrowserView for creating a PDF", None)
         rawPDF = asPDF(number=settings.issue, plainfile=True)
-        
-        filename = "%s.pdf" %context.getId()
+
         verb = "Updated"
         if not baseFile.getTranslation(lang):
-            transFile = baseFile.addTranslation(lang)
+            baseFile.addTranslation(lang)
             transaction.commit()
             verb="Added"
         transFile = baseFile.getTranslation(lang)
         transFile.unmarkCreationFlag()
-        transFile = baseFile.getTranslation(lang)
+        filename = transFile.getId()
         transFile.processForm(values=dict(id=filename, title=context.Title()))
         transFile.setFile(rawPDF)
         if isinstance(settings.publication_date, date):
             transFile.setEffectiveDate(DateTime(settings.publication_date.isoformat()))
-        #transaction.commit()
-        
+
         return (u"%(verb)s translated publication in language '%(lang)s' at %(path)s" %dict(verb=verb, lang=lang, path=transFile.absolute_url()),
             transFile.UID())
-        
-
-        
+  
