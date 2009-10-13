@@ -1,0 +1,40 @@
+<div xmlns:tal="http://xml.zope.org/namespaces/tal">
+
+<p tal:define="set_year view/getYear;
+               set_month view/getMonth;
+               set_day view/getDay;
+               year_range view/getYearRange;
+               month_range view/getMonthRange">
+
+    <select name="year" tal:attributes="name string:${view/name}_year">
+      <option value="">--</option>
+      <span tal:repeat="year year_range">
+        <option value="year" tal:attributes="value year; 
+                       selected python:year==set_year and 'selected' or ''" tal:content="year">year</option>
+      </span>
+    </select>
+
+    <select name="month" tal:attributes="name string:${view/name}_month">
+      <option value="">--</option>
+      <span tal:repeat="month month_range">
+        <option value="month" tal:attributes="value month/val;
+                       selected python:month['val']==set_month and 'selected' or ''" tal:content="month/name">month</option>
+      </span>
+    </select>
+
+    <select name="day" tal:attributes="name string:${view/name}_day">
+      <option value="">--</option>
+      <span tal:repeat="day python:range(1,32)">
+        <option value="day" tal:attributes="value day;
+                       selected python:day==set_day and 'selected' or ''" tal:content="day">day</option>
+      </span>
+    </select>
+
+  <input type="hidden" name="foo.marker" id="foo.marker"
+         tal:define="marker string:${view/name}.marker"
+         tal:attributes="name marker; id marker" />
+</p>
+
+
+
+</div> 
