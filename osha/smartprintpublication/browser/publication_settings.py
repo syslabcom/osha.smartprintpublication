@@ -19,6 +19,7 @@ from osha.theme import OSHAMessageFactory as _
 
 
 class OshaSmartprintSettings(Persistent):
+    """ stores its properties via Annotaions on the context """
     implements(IOshaSmartprintSettings)
     adapts(IATDocument)
 
@@ -58,6 +59,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
 
     @form.action(_("Apply"))
     def handle_edit_action(self, action, data):
+        # only allow the action on a canonical object
         if not self.context.isCanonical():
             can = self.context.getCanonical()
             self.status = u"ERROR: You are not working on the canonical version. Please go to the '%s' " \
@@ -77,6 +79,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
         status = list()
         transUIDs = list()
         
+        # flag that indicates whether the path to the destination folder has changed
         path_has_changed = False
         if path!=settings.path:
             path_has_changed = True
@@ -89,8 +92,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             status.append(u"ERROR: destination folder not found!")
             return status
 
-        canLang = self.context.Language()
-
+        # create the canonical publication
         msg, baseFile = self.createPDF(settings, dest, self.context, path_has_changed)
         status.append(msg)
         if not baseFile:
@@ -99,11 +101,15 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
         # creating the canonical version went ok, so now we can persist the path
         settings.path = path
         
+        # if the document has translations, make sure the canonical publication has a language
+        canLang = self.context.Language()
         translations = self.context.getTranslations()
         if len(translations)>1 and baseFile.Language()!=canLang:
             baseFile.setLanguage(canLang)
 
         transaction.commit()
+
+        # create a publication for every translation
         for lang in translations.keys():
             if lang == canLang:
                 continue
@@ -114,6 +120,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
                 return status
             transUIDs.append(uid)
             transaction.commit()
+        # persist the UIDs of all translations
         settings.existing_translations = transUIDs
         
         return status
@@ -128,11 +135,13 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             rawPDF = asPDF(number=settings.issue, plainfile=True)
         except:
             return (u"ERROR: Creating a PDF file failed. Please check connection to SmartPrintNG server", None)
-        
+
 
         filename = "%s.pdf" %context.getId()
         verb ="Updated"
+        # If no UID of a publication exists yet, or if the destination folder has changed, create a new file
         if not settings.existing_publication or path_has_changed:
+            # If an object with the given filename already exists at the destination folder, return an error
             if getattr(Acquisition.aq_base(dest), filename, None):
                 obj = getattr(dest, filename)
                 return (u"ERROR: an object of type %(type)s already exists at %(path)s, but is not connected " \
@@ -144,6 +153,8 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             newFile = getattr(dest, filename)
             newFile.unmarkCreationFlag()
             settings.existing_publication = newFile.UID()
+
+        # Retrieve the publication from the catalog by its UID
         else:
             catalog = getToolByName(context, 'portal_catalog')
             brains = catalog(UID=settings.existing_publication)
@@ -171,6 +182,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             return (u"ERROR: Creating a PDF file failed. Please check connection to SmartPrintNG server", None)
 
         verb = "Updated"
+        # Create a translation if not present
         if not baseFile.getTranslation(lang):
             baseFile.addTranslation(lang)
             transaction.commit()
@@ -178,6 +190,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
         transFile = baseFile.getTranslation(lang)
         transFile.unmarkCreationFlag()
         filename = transFile.getId()
+        # Update the translation
         transFile.processForm(values=dict(id=filename, title=context.Title()))
         transFile.setFile(rawPDF)
         if isinstance(settings.publication_date, date):

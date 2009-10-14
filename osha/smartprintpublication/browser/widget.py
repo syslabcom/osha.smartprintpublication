@@ -16,9 +16,7 @@ class ReferenceURLWidget(SimpleInputWidget):
     def _getFormValue(self):
         """Returns a value suitable for use in an HTML form.
 
-        Detects the status of the widget and selects either the input value
-        that came from the request, the value from the _data attribute or the
-        default value.
+        Queries the catalog for all UIDs and returns a tuple of URL and language for each
         """
         input_value = list()
         pc = getToolByName(self.context.context, 'portal_catalog')
@@ -62,8 +60,9 @@ class DatePickerWidget(SimpleInputWidget):
             day = int(day)
         except:
             return None
-        #import pdb; pdb.set_trace()
+        
         return datetime.date(year, month, day)
+
 
     def getYearRange(self):
         year = datetime.date.fromtimestamp(time.time()).year
@@ -73,15 +72,12 @@ class DatePickerWidget(SimpleInputWidget):
         return [dict(val=i, name=monthname_english(i)) for i in range(1,13)]
 
     def getYear(self):
-        #return ""
         return isinstance(self._data, datetime.date) and self._data.year or ''
     
     def getMonth(self):
-        #return ""
         return isinstance(self._data, datetime.date) and self._data.month or ''
     
     def getDay(self):
-        #return ""
         return isinstance(self._data, datetime.date) and self._data.day or ''
 
 
