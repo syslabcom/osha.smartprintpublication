@@ -124,7 +124,11 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
         if not asPDF:
             # sth bad has happened
             return (u"ERROR: could not find BrowserView for creating a PDF", None)
-        rawPDF = asPDF(number=settings.issue, plainfile=True)
+        try:
+            rawPDF = asPDF(number=settings.issue, plainfile=True)
+        except:
+            return (u"ERROR: Creating a PDF file failed. Please check connection to SmartPrintNG server", None)
+        
 
         filename = "%s.pdf" %context.getId()
         verb ="Updated"
@@ -161,7 +165,10 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
         if not asPDF:
             # sth bad has happened
             return (u"ERROR: could not find BrowserView for creating a PDF", None)
-        rawPDF = asPDF(number=settings.issue, plainfile=True)
+        try:
+            rawPDF = asPDF(number=settings.issue, plainfile=True)
+        except:
+            return (u"ERROR: Creating a PDF file failed. Please check connection to SmartPrintNG server", None)
 
         verb = "Updated"
         if not baseFile.getTranslation(lang):
