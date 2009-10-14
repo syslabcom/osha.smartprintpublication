@@ -47,9 +47,10 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
     description = u"""With this form you can create a Publication (plus translations) from a Document. Set the
     correct metadata and choose a destination folder where the Publication should be created.
     A PDF document will be generated for all translations of the document and saved as a Publication in the
-    specified folder. This will take a while!
+    specified folder. The file name will be generated from the document's short name.
     If you change the original document or want to set other metadata via this form, you can always submit this form again.
-    All existing publications (listed below) will be updated."""
+    All existing publications (listed below) will be updated. NOTE: depending on the number of translations and the
+    text length, it may take some until all actions are performed - be patient..."""
     form_fields['path'].custom_widget = UberSelectionWidget
     form_fields['existing_publication'].custom_widget = ReferenceURLWidget
     form_fields['existing_translations'].custom_widget = ReferenceURLWidget
