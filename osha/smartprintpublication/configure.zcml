@@ -9,13 +9,4 @@
   <include package=".browser" />
   <include file="profiles.zcml" />
 
-    <!-- Register the installation GenericSetup extension profile -->
-    <genericsetup:registerProfile
-      name="default"
-      title="SmartprintNG for OSHA"
-      directory="profiles/default"
-      description="Custom SmartprintNG for OSHA publications"
-      provides="Products.GenericSetup.interfaces.EXTENSION"
-      />
-
 </configure>
