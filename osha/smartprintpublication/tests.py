@@ -1,53 +1,40 @@
 import unittest
+import interlude
+import zope.testing
+import zope.component
+from zope.app.testing import setup
 
-from zope.testing import doctestunit
-from zope.component import testing
 from Testing import ZopeTestCase as ztc
 
-from Products.Five import zcml
-from Products.Five import fiveconfigure
 from Products.PloneTestCase import PloneTestCase as ptc
 from Products.PloneTestCase.layer import PloneSite
-ptc.setupPloneSite()
 
-import osha.smartprintpublication
+ptc.setupPloneSite(extension_profiles=['osha.smartprintpublication:default'],)
 
 class TestCase(ptc.PloneTestCase):
     class layer(PloneSite):
         @classmethod
-        def setUp(cls):
-            fiveconfigure.debug_mode = True
-            ztc.installPackage(osha.smartprintpublication)
-            fiveconfigure.debug_mode = False
-
-        @classmethod
-        def tearDown(cls):
+        def setUp(test):
             pass
 
+        @classmethod
+        def tearDown(test):
+            setup.placefulTearDown()
+
+optionflags = (zope.testing.doctest.REPORT_ONLY_FIRST_FAILURE |
+               zope.testing.doctest.ELLIPSIS | 
+               zope.testing.doctest.NORMALIZE_WHITESPACE
+               )
 
 def test_suite():
-    return unittest.TestSuite([
+    return unittest.TestSuite((
+        ztc.FunctionalDocFileSuite(
+            'README.txt', 
+            package='osha.smartprintpublication',
+            test_class=TestCase, 
+            globs=dict(interact=interlude.interact),
+            optionflags=optionflags
+            ),
 
-        # Unit tests
-        #doctestunit.DocFileSuite(
-        #    'README.txt', package='osha.smartprintpublication',
-        #    setUp=testing.setUp, tearDown=testing.tearDown),
+        ))
 
-        #doctestunit.DocTestSuite(
-        #    module='osha.smartprintpublication.mymodule',
-        #    setUp=testing.setUp, tearDown=testing.tearDown),
-
-
-        # Integration tests that use PloneTestCase
-        #ztc.ZopeDocFileSuite(
-        #    'README.txt', package='osha.smartprintpublication',
-        #    test_class=TestCase),
-
-        #ztc.FunctionalDocFileSuite(
-        #    'browser.txt', package='osha.smartprintpublication',
-        #    test_class=TestCase),
-
-        ])
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
