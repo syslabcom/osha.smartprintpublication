@@ -50,7 +50,7 @@ setup(name='osha.smartprintpublication',
       install_requires=[
           'setuptools',
           'slc.publications',
-          'syslab.osha.smartprintng',
+          'zopyx.smartprintng.plone',
           'osha.policy',
           'osha.theme',
       ],
