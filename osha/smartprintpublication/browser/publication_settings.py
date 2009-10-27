@@ -8,6 +8,7 @@ from persistent import Persistent
 from zope.annotation import factory
 from Products.ATContentTypes.interface.document import IATDocument
 from plone.app.form.widgets.uberselectionwidget import UberSelectionWidget
+from Products.statusmessages.interfaces import IStatusMessage
 import Acquisition
 import transaction
 
@@ -60,10 +61,11 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
     @form.action(_("Apply"))
     def handle_edit_action(self, action, data):
         # only allow the action on a canonical object
+        status = IStatusMessage(self.request)
         if not self.context.isCanonical():
             can = self.context.getCanonical()
-            self.status = u"ERROR: You are not working on the canonical version. Please go to the '%s' " \
-                u"version at \n%s" %(can.Language(), can.absolute_url())
+            status.addStatusMessage(u"ERROR: You are not working on the canonical version. Please go to the '%s' " \
+                u"version at \n%s" %(can.Language(), can.absolute_url()), type="error")
         else:
             settings = IOshaSmartprintSettings(self.context)
             path = data['path']
@@ -71,12 +73,12 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             settings.issue = data['issue']
             settings.subject = data['subject']
             
-            msg = self.handlePDFCreation(settings, path)
-            self.status = "\n".join(msg)
+            self.handlePDFCreation(settings, path, status)
+            #self.status = "\n".join(msg)
 
 
-    def handlePDFCreation(self, settings, path):
-        status = list()
+    def handlePDFCreation(self, settings, path, status):
+        #status = list()
         transUIDs = list()
         
         # flag that indicates whether the path to the destination folder has changed
@@ -89,15 +91,15 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             relpath = relpath[1:]
         dest = self.context.restrictedTraverse(relpath, None)
         if not dest:
-            status.append(u"ERROR: destination folder not found!")
-            return status
+            status.addStatusMessage(u"Destination folder not found!", type="error")
+            return
 
         # create the canonical publication
-        msg, baseFile = self.createPDF(settings, dest, self.context, path_has_changed)
-        status.append(msg)
+        baseFile = self.createPDF(settings, dest, self.context, path_has_changed, status)
+        #status.append(msg)
         if not baseFile:
-            status.append(u"ERROR: publication could not be created")
-            return status
+            status.addStatusMessage(u"Publication could not be created", type="error")
+            return
         # creating the canonical version went ok, so now we can persist the path
         settings.path = path
         
@@ -113,82 +115,92 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
         for lang in translations.keys():
             if lang == canLang:
                 continue
-            msg, uid = self.createTranslatedPDF(settings, translations[lang][0], lang, baseFile)
-            status.append(msg)
+            uid = self.createTranslatedPDF(settings, translations[lang][0], lang, baseFile, status)
+            #status.append(msg)
             if not uid:
-                status.append(u"ERROR: translated version of the publication could not be created")
-                return status
+                status.addStatusMessage(u"Translated version of the publication could not be created", type="error")
+                return
             transUIDs.append(uid)
             transaction.commit()
         # persist the UIDs of all translations
         settings.existing_translations = transUIDs
         
-        return status
+        return
 
 
-    def createPDF(self, settings, dest, context, path_has_changed):
-        asPDF = context.restrictedTraverse('asPDF', None)
+    def createPDF(self, settings, dest, context, path_has_changed, status):
+        asPDF = context.restrictedTraverse('asEfact', None)
         if not asPDF:
             # sth bad has happened
-            return (u"ERROR: could not find BrowserView for creating a PDF", None)
+            status.addStatusMessage(u"Could not find BrowserView for creating a PDF", type="error")
+            return None
         try:
             rawPDF = asPDF(number=settings.issue, plainfile=True)
         except:
-            return (u"ERROR: Creating a PDF file failed. Please check connection to SmartPrintNG server", None)
+            status.addStatusMessage(u"Creating a PDF file failed. Please check connection to SmartPrintNG server", type="error")
+            return None
 
 
         filename = "%s.pdf" %context.getId()
-        verb ="Updated"
         # If no UID of a publication exists yet, or if the destination folder has changed, create a new file
         if not settings.existing_publication or path_has_changed:
             # If an object with the given filename already exists at the destination folder, return an error
             if getattr(Acquisition.aq_base(dest), filename, None):
                 obj = getattr(dest, filename)
-                return (u"ERROR: an object of type %(type)s already exists at %(path)s, but is not connected " \
+                status.addStatusMessage(u"An object of type %(type)s already exists at %(path)s, but is not connected " \
                  "to this document. Please remove it first or change the document's short name (id)" %dict(
-                    type=type(Acquisition.aq_base(obj)), path=obj.absolute_url()), None)
+                    type=type(Acquisition.aq_base(obj)), path=obj.absolute_url()), type="warning")
+                return None
             dest.invokeFactory(type_name="File", id=filename)
             transaction.commit()
-            verb="Added"
             newFile = getattr(dest, filename)
             newFile.unmarkCreationFlag()
             settings.existing_publication = newFile.UID()
+            isNew=True
 
         # Retrieve the publication from the catalog by its UID
         else:
             catalog = getToolByName(context, 'portal_catalog')
             brains = catalog(UID=settings.existing_publication)
             if not len(brains):
-                return (u"ERROR: existing Publication could not be retrieved", None)
+                status.addStatusMessage(u"Existing Publication could not be retrieved", type="error")
+                return None
             newFile = brains[0].getObject()
             if not newFile:
-                return (u"ERROR: reference to exiting Publication is broken", None)
+                status.addStatusMessage(u"Reference to exiting Publication is broken", type="error")
+                return None
+            isNew=False
         newFile.processForm(values=dict(id=filename, title=context.Title()))
         newFile.setFile(rawPDF)
         newFile.setSubject(settings.subject)
         if isinstance(settings.publication_date, date):
             newFile.setEffectiveDate(DateTime(settings.publication_date.isoformat()))
-        return (u"%(verb)s publication at %(url)s" %dict(verb=verb, url=newFile.absolute_url()), newFile)
+        status.addStatusMessage(u"%(verb)s publication at %(url)s" %dict(
+            verb=isNew and 'Added' or 'Updated', url=newFile.absolute_url()), type="info")
+        return newFile
 
 
-    def createTranslatedPDF(self, settings, context, lang, baseFile):
-        asPDF = context.restrictedTraverse('asPDF', None)
+    def createTranslatedPDF(self, settings, context, lang, baseFile, status):
+        asPDF = context.restrictedTraverse('asEfact', None)
         if not asPDF:
             # sth bad has happened
-            return (u"ERROR: could not find BrowserView for creating a PDF", None)
+            status.addStatusMessage(u"Could not find BrowserView for creating a PDF", type="error")
+            return None
         try:
             rawPDF = asPDF(number=settings.issue, plainfile=True)
         except:
-            return (u"ERROR: Creating a PDF file failed. Please check connection to SmartPrintNG server", None)
+            status.addStatusMessage(u"Creating a PDF file failed. Please check connection to SmartPrintNG server", type="error")
+            return None
 
-        verb = "Updated"
+        isNew=False
         # Create a translation if not present
         if not baseFile.getTranslation(lang):
             baseFile.addTranslation(lang)
             transaction.commit()
-            verb="Added"
+            isNew=True
         transFile = baseFile.getTranslation(lang)
-        transFile.unmarkCreationFlag()
+        if isNew:
+            transFile.unmarkCreationFlag()
         filename = transFile.getId()
         # Update the translation
         transFile.processForm(values=dict(id=filename, title=context.Title()))
@@ -196,6 +208,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
         if isinstance(settings.publication_date, date):
             transFile.setEffectiveDate(DateTime(settings.publication_date.isoformat()))
 
-        return (u"%(verb)s translated publication in language '%(lang)s' at %(path)s" %dict(verb=verb, lang=lang, path=transFile.absolute_url()),
-            transFile.UID())
+        status.addStatusMessage(u"%(verb)s translated publication in language '%(lang)s' at %(path)s" %dict(
+            verb=isNew and 'Added' or 'Updated', lang=lang, path=transFile.absolute_url()), type="info")
+        return transFile.UID()
   
