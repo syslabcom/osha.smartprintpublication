@@ -1,6 +1,11 @@
 osha.smartprintpublication Changelog
 ====================================
 
+0.2 (2009-10-27)
+----------------
+
+- now using zopyx.smartprintng.plone instead of syslab.osha.smartprintng (thomasw)
+
 0.1 (2009-10-14)
 ----------------
 
