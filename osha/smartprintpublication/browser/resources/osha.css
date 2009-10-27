@@ -1,0 +1,293 @@
+
+@page {
+    size: A4;
+
+    margin-top: 50mm;
+
+    @bottom {
+        content: "Page " counter(page) " of " counter(pages)
+    }
+}
+
+@page:first {
+
+    @top {
+        content: flow(firstpage);
+    }
+}
+
+* {
+    font-family: Arial;
+}
+
+h1 {
+    font-size: 25px;
+}
+
+h2 {
+    font-size: 20px;
+}
+
+.description {
+    font-weight: bold;
+    font-size: 16px;
+    page-break-inside: avoid;
+}
+
+.body {
+    text-align: justify;
+}
+
+/*
+ * title box appearing on the first page
+*/
+
+.first-page-box {
+    flow: static(firstpage);
+}
+
+.first-page-box table {
+    text-align: center;
+    width: 100%;
+}
+
+#first-page-logo {
+    width: 500px;
+}
+
+#first-page-text {
+    font-weight: bold;
+    font-size: 20px;
+    vertical-align: middle;
+    border: 4px double #003366;
+    padding: 1em;
+}
+
+
+/*
+ * title box appearing on each page except the first page
+*/
+
+.title-box {
+    flow: static(header);
+}
+
+.title-box table {
+    text-align: center;
+    width: 100%;
+}
+
+#title-box-logo {
+    width: 150px;
+}
+
+#title-box-text {
+    font-weight: bold;
+    font-size: 18px;
+    vertical-align: middle;
+    color: #003366;
+}
+
+/* 
+ * footer
+*/
+
+.footer {
+    flow: static(footer);
+}
+
+#footer-page-counter,
+#footer-text {
+    text-align: center;
+    font-size: 10px;
+}
+
+#footer-text {
+    margin-bottom: 1em;
+}
+
+#footer-page-counter {
+}
+
+pre {
+    font-size: 9px;
+    background-color: #eeeeee;
+    color: black;
+    white-space: pre-wrap;
+    margin-left: 1em;
+    margin-right: 1em;
+    padding: 0.5em;
+    font-family: "Courier New";
+    border: thin solid black;
+    border-radius: 8px;
+    padding: 0.4em;
+}
+
+
+/*
+ * for debugging
+*/
+h1, h2, h3, table, div, pre {
+//    border: 1px solid black;
+}
+
+
+
+/* 
+ * Folder specific styles
+ */
+
+@page foldermetadata {
+    @top-right { content: ""}
+}
+
+
+.folder.l0,
+.folder.l1 {
+    page-break-after: always;
+}
+
+.folder-metadata {
+    page-break-after: always;
+    page: foldermetadata;
+}
+
+.folder-top-area {
+}
+
+
+.l1 .folder-metadata {
+    counter-increment: chapter;
+    counter-reset: section;
+//    counter-reset: footnote;
+}
+
+h1 {
+    counter-increment: section;
+    counter-reset: subsection;
+}
+
+h3 {
+    counter-increment: subsection;
+    counter-reset: subsubsection;
+}
+
+h4 {
+    counter-increment: subsubsection;
+}
+
+tt {
+    font-family: Courier;
+    background: #dddddd;
+}
+
+.l1 h1:before {
+    content: counter(chapter) "." counter(section) " ";
+}
+
+.l1 h3:before {
+    content: counter(chapter) "." counter(section) "." counter(subsection) " ";
+}
+
+.l1 h4:before {
+    content: counter(chapter) "." counter(section) "." counter(subsection) "." counter(subsubsection) " ";
+}
+
+
+.book-title {
+    font-size: 28px;
+    margin-top: 15cm;
+    border-bottom: 4pt solid black;
+}
+
+
+.folder-title {
+    font-size: 28px;
+    margin-top: 15cm;
+    border-bottom: 4pt solid black;
+    prince-bookmark-level: 1;
+    prince-bookmark-label: counter(chapter) '. ' content();
+}
+
+
+.l1 .folder-title:before {
+    content: counter(chapter) ". ";
+}
+
+.folder.l1 .folder-title {
+    string-set: foldertitle1 content();
+}
+
+.folder.l2 .folder-title {
+    string-set: foldertitle1 content(); 
+}
+
+.folder-description{
+    font-size: 110%;
+    padding: 1em;
+    margin-top: 1em;
+    background: #eeeeee;
+    border: 1px solid #aaaaaa;
+    border: thin solid black;
+    border-radius: 5px;
+    padding: 0.4em;
+    page-break-inside: avoid;
+}
+
+.l1 h1 {
+    font-size: 20px;
+    border-bottom: 2px solid black;
+    prince-bookmark-level: 2;
+    prince-bookmark-label: counter(chapter) "." counter(section) " " content();
+}
+
+//.l1 h2 {
+//    font-size: 17px;
+//    border-bottom: 1.5px solid black;
+//    prince-bookmark-level: 3;
+//    prince-bookmark-label: content();
+//    prince-bookmark-label: counter(chapter) "." counter(section) "." counter(subsection) " " content();
+//}
+
+.l1 h3 {
+    font-size: 15px;
+    border-bottom: 1px solid black;
+    prince-bookmark-level: 3;
+    prince-bookmark-label: counter(chapter) "." counter(section) "." counter(subsection) " " content();
+}
+
+.l1 h4 {
+    font-size: 13px;
+    border-bottom: 1px solid #aaaaaa;
+    prince-bookmark-level: 4;
+    prince-bookmark-label: counter(chapter) "." counter(section) "." counter(subsection) "." counter(subsubsection) " " content();
+}
+
+/* 
+ * Footnotes  
+*/ 
+ 
+.generated-footnote { 
+    display: prince-footnote; 
+    counter-increment: footnote; 
+    font-weight: normal; 
+    font-size: 9px;
+} 
+ 
+.generated-footnote::footnote-call { 
+    content: "[" counter(footnote) "]"; 
+    font-size: 83%; 
+    vertical-align: super; 
+    line-height: none 
+    font-weight: normal; 
+    padding-right: 1em; 
+} 
+
+
+/* 
+ * Newsitem
+ */
+
+.teaser-image {
+    width: 50%;
+}

@@ -3,6 +3,13 @@
     xmlns:browser="http://namespaces.zope.org/browser"
     i18n_domain="osha">
 
+    <browser:page
+      name="asEfact"
+      for="*"
+      permission="zope2.View"
+      class=".efact.EfactView"
+      />
+
     <class class=".publication_settings.OshaSmartprintSettings">
         <require
             permission="cmf.ModifyPortalContent"

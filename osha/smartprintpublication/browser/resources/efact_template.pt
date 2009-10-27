@@ -1,0 +1,53 @@
+<html>
+    <head>
+        /* The standard CSS */
+        <link rel="stylesheet" href="styles.css" />
+        <link rel="stylesheet" href="osha.css" />
+
+        /* Language dependent hyphenation support */
+        <tal:if condition="options/language | nothing">
+            <link rel="stylesheet" tal:attributes="href string:${options/language}.css" />
+        </tal:if>
+
+        <tal:if condition="options/custom_css |nothing">
+            <style type="text/css" tal:content="options/custom_css" />
+        </tal:if>
+    </head>
+    <body>
+
+        <div class="first-page-box">
+            <table>
+                <tr>
+                    <td id="first-page-logo">
+                        <img class="internal-resource" src="e-facts-banner.jpg" /> 
+                    </td>
+                    <td id="first-page-text">
+                        <span tal:content="view/getNumber" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="title-box">
+            <table>
+                <tr>
+                    <td id="title-box-logo">
+                        <img class="internal-resource" src="logo.png" /> 
+                    </td>
+                    <td id="title-box-text">
+                        <span tal:replace="context/Title" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="footer">
+            <div id="footer-text">
+            European Agency for Safety and Health at Work - http://osha.europa.eu
+            </div>
+            <div id="footer-page-counter" style="content: counter(page)"></div>
+        </div>
+
+        <div tal:replace="structure options/body" />
+    </body>
+</html>
