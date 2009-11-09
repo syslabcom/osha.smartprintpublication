@@ -1,0 +1,1 @@
+PUBLICATION_DOCUMENT_REFERENCE = 'oshapublicationoriginaldocument'
