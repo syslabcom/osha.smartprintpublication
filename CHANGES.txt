@@ -4,7 +4,8 @@ osha.smartprintpublication Changelog
 0.3 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Added an adapter for slc.publications that provides additional info for the Publication view,
+  a link to an existing document, if present (thomasw)
 
 
 0.2 (2009-10-27)

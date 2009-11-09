@@ -1,4 +1,4 @@
-from zope.annotation.interfaces import IAnnotations, IAttributeAnnotatable, IAnnotatable
+from zope.annotation.interfaces import IAnnotations
 from zope.interface import Interface, implements
 from zope.component import adapts
 from zope.app.component.hooks import getSite
@@ -18,6 +18,7 @@ from datetime import date
 from DateTime import DateTime
 from osha.theme import OSHAMessageFactory as _
 
+from osha.smartprintpublication.config import PUBLICATION_DOCUMENT_REFERENCE
 
 class OshaSmartprintSettings(Persistent):
     """ stores its properties via Annotaions on the context """
@@ -173,6 +174,9 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
         newFile.processForm(values=dict(id=filename, title=context.Title()))
         newFile.setFile(rawPDF)
         newFile.setSubject(settings.subject)
+        # set a link to the original document on the publication
+        ann = IAnnotations(newFile)
+        ann[PUBLICATION_DOCUMENT_REFERENCE] = context.UID()
         if isinstance(settings.publication_date, date):
             newFile.setEffectiveDate(DateTime(settings.publication_date.isoformat()))
         status.addStatusMessage(u"%(verb)s publication at %(url)s" %dict(
@@ -208,6 +212,9 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
         if isinstance(settings.publication_date, date):
             transFile.setEffectiveDate(DateTime(settings.publication_date.isoformat()))
 
+        # set a link to the original translated document on the publication
+        ann = IAnnotations(transFile)
+        ann[PUBLICATION_DOCUMENT_REFERENCE] = context.UID()
         status.addStatusMessage(u"%(verb)s translated publication in language '%(lang)s' at %(path)s" %dict(
             verb=isNew and 'Added' or 'Updated', lang=lang, path=transFile.absolute_url()), type="info")
         return transFile.UID()

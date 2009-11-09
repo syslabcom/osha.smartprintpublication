@@ -22,6 +22,13 @@
      factory=".publication_settings.smartprint_adapter_document"
     />
 
+        
+    <adapter
+     factory=".adapters.AdditionalPublicationInfo"
+     for="slc.publications.interfaces.IPublicationEnhanced"
+     provides="slc.publications.interfaces.IAdditionalPublicationInfo"
+    />
+
     <browser:page
         for="*"
         name="publishAsPDF"
