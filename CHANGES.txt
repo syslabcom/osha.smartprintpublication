@@ -4,6 +4,7 @@ osha.smartprintpublication Changelog
 0.3 (unreleased)
 ----------------
 
+- Added EUPL license (deroiste)
 - Added an adapter for slc.publications that provides additional info for the Publication view,
   a link to an existing document, if present (thomasw)
 
