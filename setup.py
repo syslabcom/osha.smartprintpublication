@@ -5,7 +5,7 @@ def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 
-version = '0.3dev'
+version = '0.3'
 
 long_description = (
     read('README.txt')
@@ -28,7 +28,7 @@ long_description = (
 
 setup(name='osha.smartprintpublication',
       version=version,
-      description="Integrationn of syslab.osha.smartprintng into OSHA portal and slc.publications",
+      description="Integrationn of zopyx.smartprintng.plone with OSHA portal and slc.publications",
       long_description=long_description,
       # Get more strings from http://www.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[
