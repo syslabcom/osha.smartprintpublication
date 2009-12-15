@@ -46,12 +46,3 @@ class IOshaSmartprintSettings(Interface):
                             )
                     )
 
-    subject = schema.Tuple(title=_(u'Keywords'),
-                            description=_('Select one or more keywords applicbale to this Publication'),
-                            default=tuple(),
-                            required=False,
-                            value_type=schema.Choice(
-                                vocabulary="osha.policy.vocabularies.categories",
-                            )
-            )
-

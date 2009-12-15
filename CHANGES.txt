@@ -4,8 +4,8 @@ osha.smartprintpublication Changelog
 0.4 (unreleased)
 ----------------
 
-- Nothing changed yet.
-
+- Don't set Subject in the form. Rather, set subcategory, Nace, and
+  multilingual_thesaurus based on the document's metadata (thomasw)
 
 0.3 (2009-12-10)
 ----------------

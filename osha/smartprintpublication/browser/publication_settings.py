@@ -39,7 +39,6 @@ class OshaSmartprintSettings(Persistent):
     issue = ''
     publication_date = None
     existing_publication = ''
-    subject = tuple()
     existing_translations = list()
 
 smartprint_adapter_document = factory(OshaSmartprintSettings)
@@ -72,7 +71,6 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             path = data['path']
             settings.publication_date = data['publication_date']
             settings.issue = data['issue']
-            settings.subject = data['subject']
             
             self.handlePDFCreation(settings, path, status)
             #self.status = "\n".join(msg)
@@ -96,6 +94,9 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             return
 
         # create the canonical publication
+        setattr(settings, 'subcategory', self.context.getSubcategory())
+        setattr(settings, 'nace', self.context.getNace())
+        setattr(settings, 'multilingual_thesaurus', self.context.getMultilingual_thesaurus())
         baseFile = self.createPDF(settings, dest, self.context, path_has_changed, status)
         #status.append(msg)
         if not baseFile:
@@ -173,7 +174,9 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             isNew=False
         newFile.processForm(values=dict(id=filename, title=context.Title()))
         newFile.setFile(rawPDF)
-        newFile.setSubject(settings.subject)
+        newFile.setSubcategory(settings.subcategory)
+        newFile.setNace(settings.nace)
+        newFile.setMultilingual_thesaurus(settings.multilingual_thesaurus)
         # set a link to the original document on the publication
         ann = IAnnotations(newFile)
         ann[PUBLICATION_DOCUMENT_REFERENCE] = context.UID()
