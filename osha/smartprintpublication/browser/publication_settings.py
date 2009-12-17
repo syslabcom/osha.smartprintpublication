@@ -143,7 +143,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             return None
 
 
-        filename = "%s.pdf" %context.getId()
+        filename = "%s.pdf" %settings.issue
         # If no UID of a publication exists yet, or if the destination folder has changed, create a new file
         if not settings.existing_publication or path_has_changed:
             # If an object with the given filename already exists at the destination folder, return an error
