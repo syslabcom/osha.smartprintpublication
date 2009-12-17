@@ -1,11 +1,14 @@
 osha.smartprintpublication Changelog
 ====================================
 
-0.4 (unreleased)
+0.4 (2009-12-17)
 ----------------
 
 - Don't set Subject in the form. Rather, set subcategory, Nace, and
   multilingual_thesaurus based on the document's metadata (thomasw)
+- Create filename based on issue number
+- Link to all language versions of the original document on a
+  publication (thomasw)
 
 0.3 (2009-12-10)
 ----------------
