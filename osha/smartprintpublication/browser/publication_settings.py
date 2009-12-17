@@ -94,6 +94,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             return
 
         # create the canonical publication
+        setattr(settings, 'subject', self.context.Subject())
         setattr(settings, 'subcategory', self.context.getSubcategory())
         setattr(settings, 'nace', self.context.getNace())
         setattr(settings, 'multilingual_thesaurus', self.context.getMultilingual_thesaurus())
@@ -174,6 +175,9 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             isNew=False
         newFile.processForm(values=dict(id=filename, title=context.Title()))
         newFile.setFile(rawPDF)
+        # setting Subject AND Subcategory shouldn't be necessary
+        # But we don't know yet what the client prefers
+        newFile.setSubject(settings.subject)
         newFile.setSubcategory(settings.subcategory)
         newFile.setNace(settings.nace)
         newFile.setMultilingual_thesaurus(settings.multilingual_thesaurus)
