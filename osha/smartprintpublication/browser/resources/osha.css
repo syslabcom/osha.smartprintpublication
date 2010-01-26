@@ -1,16 +1,15 @@
 
 @page {
     size: A4;
-
     margin-top: 50mm;
+    @bottom { content: flow(footer); }
 
-    @bottom {
-        content: "Page " counter(page) " of " counter(pages)
+    @top {
+        content: flow(header);
     }
 }
 
 @page:first {
-
     @top {
         content: flow(firstpage);
     }
