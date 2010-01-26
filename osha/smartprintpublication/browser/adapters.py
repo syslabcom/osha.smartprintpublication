@@ -30,7 +30,9 @@ class AdditionalPublicationInfo(object):
                     for lang in lang_codes:
                         trans = translations[lang][0]
                         url = trans.absolute_url()
-
+                        # treat neutral as the site's default language
+                        if lang == '':
+                            lang = portal_languages.getDefaultLanguage()
                         name = ali.get(lang, {'native': lang})['native']
                         links.append( (name, url) )
                     
