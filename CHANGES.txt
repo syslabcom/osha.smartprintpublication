@@ -4,7 +4,10 @@ osha.smartprintpublication Changelog
 0.5 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- bugfix: re-added missing footer and header (thomasw)
+- on the created File, the description is now also set (thomasw)
+- On the publication view, treat a "neutral" source document as if it had the
+  site's default language (thomasw)
 
 
 0.4 (2009-12-17)
