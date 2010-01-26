@@ -10,6 +10,13 @@
       class=".efact.EfactView"
       />
 
+    <browser:page
+      name="asPlainEfact"
+      for="*"
+      permission="zope2.View"
+      class=".efact.EfactDownloadView"
+      />
+
     <class class=".publication_settings.OshaSmartprintSettings">
         <require
             permission="cmf.ModifyPortalContent"

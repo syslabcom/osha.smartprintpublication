@@ -22,8 +22,7 @@ class EfactView(PDFView):
     def __call__(self, *args, **kw):
         self.kw = kw
         pdf_file = super(EfactView, self).__call__(*args, **kw)
-        return file(pdf_file, 'rb').read()
-
+        return pdf_file
 
     def getNumber(self):
         """ An external method / BrowserView might be hooked in here in the future.
@@ -34,3 +33,21 @@ class EfactView(PDFView):
 InitializeClass(EfactView)
 
 
+class EfactDownloadView(EfactView):
+    """ Direct PDF download """
+
+    def __call__(self, *args, **kw):
+        pdf_file = super(EfactDownloadView, self).__call__(*args, **kw)
+
+        # return PDF over HTTP
+        R = self.request.response
+        R.setHeader('content-type', 'application/pdf')
+        R.setHeader('content-disposition', 'attachment; filename=%s.pdf' % self.context.getId())
+        R.setHeader('content-length', os.stat(pdf_file)[6])
+        R.setHeader('pragma', 'no-cache')
+        R.setHeader('cache-control', 'no-cache')
+        R.setHeader('Expires', 'Fri, 30 Oct 1998 14:19:41 GMT')
+        R.setHeader('content-length', os.stat(pdf_file)[6])
+        return file(pdf_file, 'rb').read()
+
+InitializeClass(EfactDownloadView)

@@ -138,7 +138,8 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             status.addStatusMessage(u"Could not find BrowserView for creating a PDF", type="error")
             return None
         try:
-            rawPDF = asPDF(number=settings.issue, plainfile=True)
+            rawPDF = asPDF(number=settings.issue)
+            rawPDF = file(rawPDF, 'rb').read()
         except:
             status.addStatusMessage(u"Creating a PDF file failed. Please check connection to SmartPrintNG server", type="error")
             return None
@@ -199,7 +200,8 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             status.addStatusMessage(u"Could not find BrowserView for creating a PDF", type="error")
             return None
         try:
-            rawPDF = asPDF(number=settings.issue, plainfile=True)
+            rawPDF = asPDF(number=settings.issue)
+            rawPDF = file(rawPDF, 'rb').read()
         except:
             status.addStatusMessage(u"Creating a PDF file failed. Please check connection to SmartPrintNG server", type="error")
             return None
