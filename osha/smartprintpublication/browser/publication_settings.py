@@ -95,7 +95,7 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
 
         # create the canonical publication
         setattr(settings, 'subject', self.context.Subject())
-        setattr(settings, 'subcategory', self.context.getSubcategory())
+        # setattr(settings, 'subcategory', self.context.getSubcategory())
         setattr(settings, 'nace', self.context.getNace())
         setattr(settings, 'multilingual_thesaurus', self.context.getMultilingual_thesaurus())
         baseFile = self.createPDF(settings, dest, self.context, path_has_changed, status)
@@ -173,12 +173,13 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
                 status.addStatusMessage(u"Reference to exiting Publication is broken", type="error")
                 return None
             isNew=False
-        newFile.processForm(values=dict(id=filename, title=context.Title()))
+        newFile.processForm(values=dict(id=filename, title=context.Title(),
+            description=context.Description()))
         newFile.setFile(rawPDF)
         # setting Subject AND Subcategory shouldn't be necessary
         # But we don't know yet what the client prefers
         newFile.setSubject(settings.subject)
-        newFile.setSubcategory(settings.subcategory)
+        # newFile.setSubcategory(settings.subcategory)
         newFile.setNace(settings.nace)
         newFile.setMultilingual_thesaurus(settings.multilingual_thesaurus)
         # set a link to the original document on the publication
@@ -214,7 +215,8 @@ class OshaSmartprintSettingsForm(form.PageEditForm):
             transFile.unmarkCreationFlag()
         filename = transFile.getId()
         # Update the translation
-        transFile.processForm(values=dict(id=filename, title=context.Title()))
+        transFile.processForm(values=dict(id=filename, title=context.Title(),
+            description=context.Description()))
         transFile.setFile(rawPDF)
         if isinstance(settings.publication_date, date):
             transFile.setEffectiveDate(DateTime(settings.publication_date.isoformat()))
