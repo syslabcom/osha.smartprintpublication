@@ -1,7 +1,7 @@
 from zope.interface import implements
 from zope.annotation.interfaces import IAnnotations
 from Products.CMFCore.utils import getToolByName
-from Products.PlacelessTranslationService import getTranslationService
+from zope.i18n import translate
 
 from osha.smartprintpublication.config import PUBLICATION_DOCUMENT_REFERENCE
 
@@ -36,8 +36,7 @@ class AdditionalPublicationInfo(object):
                         name = ali.get(lang, {'native': lang})['native']
                         links.append( (name, url) )
                     
-                    pts = getTranslationService()
-                    label = pts.translate(domain="osha",
+                    label = translate(domain="osha",
                         msgid=u'label_also_online',
                         context=self.context,
                         target_language=preflang,
