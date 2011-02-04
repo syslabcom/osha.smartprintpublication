@@ -4,8 +4,7 @@ osha.smartprintpublication Changelog
 0.5.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- replaced getTranslationService().translate with zope.i18n.translate [thomasw]
 
 0.5 (2010-01-27)
 ----------------
