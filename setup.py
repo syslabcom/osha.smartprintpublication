@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 import os
 
 def read(*rnames):
@@ -45,7 +45,7 @@ setup(name='osha.smartprintpublication',
       author_email='info@syslab.com',
       url='http://www.syslab.com/',
       license='GPL + EUPL',
-      packages = ['osha', 'osha/smartprintpublication'],
+      packages=['osha', 'osha/smartprintpublication'],
       namespace_packages=['osha'],
       include_package_data=True,
       zip_safe=False,
@@ -56,6 +56,12 @@ setup(name='osha.smartprintpublication',
           'osha.policy',
           'osha.theme',
       ],
+      extras_require={
+          'test': [
+              'plone.app.testing',
+              'mock',
+          ],
+      },
       entry_points="""
       # -*- Entry points: -*-
       """,
