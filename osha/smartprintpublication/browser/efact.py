@@ -1,14 +1,14 @@
-
 import os
 
 from Globals import InitializeClass
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
-from zopyx.smartprintng.plone.browser.pdf import PDFView
+from zopyx.smartprintng.plone.browser.pdf import ProducePublishView
 #from transformation import Transformer
 
 cwd = os.path.dirname(os.path.abspath(__file__))
 
-class EfactView(PDFView):
+
+class EfactView(ProducePublishView):
     """ Integration for E-facts """
 
     template = ViewPageTemplateFile('resources/efact_template.pt')
@@ -25,8 +25,9 @@ class EfactView(PDFView):
         return pdf_file
 
     def getNumber(self):
-        """ An external method / BrowserView might be hooked in here in the future.
-            For now, we just look into the passed-in kw."""
+        """ An external method / BrowserView might be hooked in here in
+        the future. For now, we just look into the passed-in kw.
+        """
         number = self.kw.get('number', '42')
         return number
 
@@ -42,7 +43,8 @@ class EfactDownloadView(EfactView):
         # return PDF over HTTP
         R = self.request.response
         R.setHeader('content-type', 'application/pdf')
-        R.setHeader('content-disposition', 'attachment; filename=%s.pdf' % self.context.getId())
+        R.setHeader('content-disposition',
+                    'attachment; filename=%s.pdf' % self.context.getId())
         R.setHeader('content-length', os.stat(pdf_file)[6])
         R.setHeader('pragma', 'no-cache')
         R.setHeader('cache-control', 'no-cache')
