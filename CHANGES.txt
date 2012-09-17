@@ -1,10 +1,10 @@
 osha.smartprintpublication Changelog
 ====================================
 
-0.5.2 (unreleased)
-------------------
+0.6 (2012-09-17)
+----------------
 
-- Nothing changed yet.
+- Plone 4
 
 
 0.5.1 (2011-02-21)
