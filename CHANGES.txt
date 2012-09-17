@@ -1,6 +1,12 @@
 osha.smartprintpublication Changelog
 ====================================
 
+0.6.1 (unreleased)
+------------------
+
+- Nothing changed yet.
+
+
 0.6 (2012-09-17)
 ----------------
 
